@@ -520,18 +520,23 @@ body{
 .tool-btn.active{background:var(--blue);border-color:var(--blue)}
 .tool-btn.active svg{fill:white}
 
-/* ── TOASTS ───────────────────────────────────────────────── */
+/* ── TOASTS — floating, centered, 32px from bottom ───────── */
 .toast{
-  position:absolute;
-  bottom:0;left:0;right:0;
-  padding:13px 20px;
+  position:fixed;
+  bottom:32px;
+  left:50%;
+  transform:translateX(-50%) translateY(calc(100% + 48px));
+  opacity:0;
+  transition:transform .25s ease,opacity .25s ease;
+  padding:12px 24px;
+  border-radius:8px;
   font-size:13.5px;font-weight:500;color:white;
-  z-index:500;
-  transform:translateY(100%);opacity:0;
-  transition:transform .22s ease,opacity .22s ease;
-  text-align:center;
+  z-index:9999;
+  white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  pointer-events:none;
 }
-.toast.show{transform:translateY(0);opacity:1}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast-green{background:var(--green)}
 .toast-dark{background:#1F2937}
 .toast-red{background:var(--red)}
@@ -1156,60 +1161,79 @@ function escHtml(t) {
 }
 
 // ── BOT RESPONSES (Oscar, customer with payment/rental issue) ─
+const PHONES = ['+549****5467', '+549****1826'];
+
 const botRules = [
-  { kw:['hola','buenos','buenas','buen día','tardes'],
-    r:['Hola, buenas tardes.','Hola, sí aquí le espero.'] },
+  // Phone / call — highest priority, check first
+  { kw:['llamar','llamo','llame','llamarte','llamarle','telefono','teléfono',
+        'numero','número','celular','contactar','comunic','al que','a que numero',
+        'a qué número','puedo llamar'],
+    r:[
+      `Claro, puede llamarme al ${PHONES[0]}, ese es mi número principal.`,
+      `Al ${PHONES[1]} también puede contactarme, ese es mi celular.`,
+      `Tiene registrado el ${PHONES[0]} y el ${PHONES[1]}, cualquiera de los dos está bien.`,
+      `El ${PHONES[0]} es el mejor número para ubicarme en este momento.`,
+    ]
+  },
+  { kw:['hola','buenos','buenas','buen dia','tardes','mañana'],
+    r:['Hola, buenas tardes.','Hola, sí aquí le espero.','Buenas tardes, con gusto.'] },
+  { kw:['nombre','quien','identificar','datos'],
+    r:['Soy Oscar David Romero Canalizo, le di mi ID al inicio: 1078712741.',
+       'Oscar Romero, ID 1078712741. ¿Necesita algo más para verificarme?'] },
   { kw:['entiendo','comprendo','claro','por supuesto','entendido'],
     r:['Sí, y lo que más me preocupa es la fecha de corte que ya se acerca.',
        'Exacto. La arrendadora ya me confirmó que ellos sí liberaron el pago de su lado.',
-       'Correcto, y en mi app todavía aparece el monto retenido.'] },
-  { kw:['momento','espere','espera','revisar','verificar','checar','consultar'],
+       'Correcto, y en mi app todavía aparece el monto retenido sin liberar.'] },
+  { kw:['momento','espere','espera','revisar','verificar','checar','consultar','buscar'],
     r:['Claro, aquí lo espero sin problema.',
        'Sí, con gusto, tómese el tiempo que necesite.',
        'Está bien, no se preocupe.'] },
-  { kw:['transacc','movimiento','operaci','folio','número'],
+  { kw:['transacc','movimiento','operaci','folio'],
     r:['Sí, el movimiento lleva 5 días en estatus pendiente.',
        'El monto retenido es de $4,800 pesos, aparece desde el día 27.',
        '¿Necesita el número de transacción? Lo tengo a la mano.'] },
-  { kw:['liberar','liberado','liberará','regresar','devolver','acreditar'],
+  { kw:['liberar','liberado','liberará','regresar','devolver','acreditar','reintegrar'],
     r:['¿Y cuánto tiempo tardaría aproximadamente en reflejarse?',
        'Perfecto, ¿eso se haría antes del día 15?',
        'Muchas gracias. ¿Me puede dar un folio de seguimiento?'] },
-  { kw:['fecha','plazo','corte','día 15','vencimiento'],
+  { kw:['fecha','plazo','corte','dia 15','vencimiento','cuando','cuándo'],
     r:['Mi fecha de corte es el 15, ya me queda poco tiempo.',
        'Sí, si no se libera antes del 15 me generaría un cargo por mora.',
        'Exacto, por eso necesito que se resuelva lo antes posible.'] },
-  { kw:['escalar','área','equipo','especialista','gestión'],
+  { kw:['escalar','area','equipo','especialista','gestion','gestión','proceso'],
     r:['Sí, por favor, lo que sea necesario para resolverlo.',
        'Perfecto, ¿me puede dar un número de caso para hacer seguimiento?',
        'De acuerdo, ¿cuánto tiempo tomaría ese proceso?'] },
-  { kw:['arrendadora','vehículo','auto','carro','contrato','renta'],
+  { kw:['arrendadora','vehiculo','vehículo','auto','carro','contrato','renta'],
     r:['Sí, el contrato ya terminó y ellos me confirmaron por escrito que liberaron el cargo.',
        'La arrendadora es Renta Fácil, y me dieron el comprobante de liberación.',
        'Correcto, el vehículo ya fue devuelto hace una semana.'] },
-  { kw:['solucion','resuelto','listo','todo bien','correcto','proceder'],
+  { kw:['solucion','resuelto','listo','todo bien','proceder','gestionar'],
     r:['Muchas gracias, quedo pendiente entonces.',
        'Perfecto, agradezco su ayuda. Que tenga buen día.',
        'Gracias, estaré al pendiente de la notificación.'] },
-  { kw:['número','teléfono','contacto','comunic'],
-    r:['Sí, pueden contactarme a este mismo número.',
-       'Prefiero que me manden notificación por la app si es posible.',
-       'Este número está bien para cualquier seguimiento.'] },
+  { kw:['gracias','perfecto','excelente'],
+    r:['Gracias a usted.','Con mucho gusto, que tenga buen día.','Muchas gracias por su atención.'] },
 ];
 
 const defaultBotR = [
-  'Sí, exactamente.',
-  'Correcto, eso es lo que está pasando.',
+  'Sí, exactamente, eso es lo que está pasando.',
+  'Correcto. ¿Hay algo más que necesite de mi parte?',
   'Entiendo, ¿y qué sigue ahora?',
   'Sí, eso es lo que necesito que me ayude a resolver.',
   '¿Y aproximadamente cuánto tiempo tomaría?',
   'De acuerdo, lo espero.',
+  'Sí, así es. Espero que se pueda resolver pronto.',
 ];
 
+function normalize(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
 function getBotResponse(agentText) {
-  const t = agentText.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const t = normalize(agentText);
   for (const rule of botRules) {
-    if (rule.kw.some(k => t.includes(k.normalize('NFD').replace(/[\u0300-\u036f]/g,'')))) {
+    if (rule.kw.some(k => t.includes(normalize(k)))) {
       return rule.r[Math.floor(Math.random() * rule.r.length)];
     }
   }
