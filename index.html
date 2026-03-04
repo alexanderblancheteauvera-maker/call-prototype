@@ -348,6 +348,31 @@ body{
   padding:0 12px 0 16px;gap:6px;
 }
 .input-placeholder{display:none}
+.chat-text-input{
+  flex:1;min-width:0;border:none;background:transparent;outline:none;
+  font-family:inherit;font-size:13.5px;color:var(--gray-900);padding:0;
+}
+.chat-text-input::placeholder{color:var(--gray-400)}
+
+/* Typing indicator */
+.typing-indicator{
+  display:flex;align-items:center;gap:4px;
+  padding:10px 14px;
+  background:var(--gray-050);
+  border-radius:12px;border-bottom-left-radius:2px;
+  width:fit-content;
+}
+.typing-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gray-400);
+  animation:typingBounce 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes typingBounce{
+  0%,60%,100%{transform:translateY(0)}
+  30%{transform:translateY(-5px)}
+}
 .icon-btn{
   width:34px;height:34px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
@@ -695,8 +720,8 @@ body{
             <button class="icon-btn" title="Emoji">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="3"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="3"/></svg>
             </button>
-            <span class="input-placeholder"></span>
-            <button class="send-btn">
+            <input id="chatTextInput" class="chat-text-input" type="text" placeholder="Escribe un mensaje..." autocomplete="off"/>
+            <button class="send-btn" onclick="sendMessage()">
               <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
           </div>
@@ -1081,6 +1106,114 @@ function showToast(type, msg) {
   el.classList.add('show');
   clearTimeout(toastTimers[type]);
   toastTimers[type] = setTimeout(() => el.classList.remove('show'), 4500);
+}
+
+// ── CHAT ─────────────────────────────────────────────────────
+const chatTextInput = document.getElementById('chatTextInput');
+
+chatTextInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+function sendMessage() {
+  const text = chatTextInput.value.trim();
+  if (!text) return;
+  chatTextInput.value = '';
+
+  // Add agent bubble
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  addBubble('agent', text, time);
+
+  // Show typing indicator then respond
+  const delay = 1000 + Math.random() * 1500;
+  const typingRow = addTypingIndicator();
+  setTimeout(() => {
+    typingRow.remove();
+    addBubble('customer', getBotResponse(text), time);
+  }, delay);
+}
+
+function addBubble(role, text, time) {
+  const row = document.createElement('div');
+  row.className = `msg-row ${role}`;
+  row.innerHTML = `<div class="bubble"><span class="bubble-text">${escHtml(text)}</span><span class="bubble-time">${time}</span></div>`;
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const row = document.createElement('div');
+  row.className = 'msg-row customer';
+  row.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
+  return row;
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── BOT RESPONSES (Oscar, customer with payment/rental issue) ─
+const botRules = [
+  { kw:['hola','buenos','buenas','buen día','tardes'],
+    r:['Hola, buenas tardes.','Hola, sí aquí le espero.'] },
+  { kw:['entiendo','comprendo','claro','por supuesto','entendido'],
+    r:['Sí, y lo que más me preocupa es la fecha de corte que ya se acerca.',
+       'Exacto. La arrendadora ya me confirmó que ellos sí liberaron el pago de su lado.',
+       'Correcto, y en mi app todavía aparece el monto retenido.'] },
+  { kw:['momento','espere','espera','revisar','verificar','checar','consultar'],
+    r:['Claro, aquí lo espero sin problema.',
+       'Sí, con gusto, tómese el tiempo que necesite.',
+       'Está bien, no se preocupe.'] },
+  { kw:['transacc','movimiento','operaci','folio','número'],
+    r:['Sí, el movimiento lleva 5 días en estatus pendiente.',
+       'El monto retenido es de $4,800 pesos, aparece desde el día 27.',
+       '¿Necesita el número de transacción? Lo tengo a la mano.'] },
+  { kw:['liberar','liberado','liberará','regresar','devolver','acreditar'],
+    r:['¿Y cuánto tiempo tardaría aproximadamente en reflejarse?',
+       'Perfecto, ¿eso se haría antes del día 15?',
+       'Muchas gracias. ¿Me puede dar un folio de seguimiento?'] },
+  { kw:['fecha','plazo','corte','día 15','vencimiento'],
+    r:['Mi fecha de corte es el 15, ya me queda poco tiempo.',
+       'Sí, si no se libera antes del 15 me generaría un cargo por mora.',
+       'Exacto, por eso necesito que se resuelva lo antes posible.'] },
+  { kw:['escalar','área','equipo','especialista','gestión'],
+    r:['Sí, por favor, lo que sea necesario para resolverlo.',
+       'Perfecto, ¿me puede dar un número de caso para hacer seguimiento?',
+       'De acuerdo, ¿cuánto tiempo tomaría ese proceso?'] },
+  { kw:['arrendadora','vehículo','auto','carro','contrato','renta'],
+    r:['Sí, el contrato ya terminó y ellos me confirmaron por escrito que liberaron el cargo.',
+       'La arrendadora es Renta Fácil, y me dieron el comprobante de liberación.',
+       'Correcto, el vehículo ya fue devuelto hace una semana.'] },
+  { kw:['solucion','resuelto','listo','todo bien','correcto','proceder'],
+    r:['Muchas gracias, quedo pendiente entonces.',
+       'Perfecto, agradezco su ayuda. Que tenga buen día.',
+       'Gracias, estaré al pendiente de la notificación.'] },
+  { kw:['número','teléfono','contacto','comunic'],
+    r:['Sí, pueden contactarme a este mismo número.',
+       'Prefiero que me manden notificación por la app si es posible.',
+       'Este número está bien para cualquier seguimiento.'] },
+];
+
+const defaultBotR = [
+  'Sí, exactamente.',
+  'Correcto, eso es lo que está pasando.',
+  'Entiendo, ¿y qué sigue ahora?',
+  'Sí, eso es lo que necesito que me ayude a resolver.',
+  '¿Y aproximadamente cuánto tiempo tomaría?',
+  'De acuerdo, lo espero.',
+];
+
+function getBotResponse(agentText) {
+  const t = agentText.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for (const rule of botRules) {
+    if (rule.kw.some(k => t.includes(k.normalize('NFD').replace(/[\u0300-\u036f]/g,'')))) {
+      return rule.r[Math.floor(Math.random() * rule.r.length)];
+    }
+  }
+  return defaultBotR[Math.floor(Math.random() * defaultBotR.length)];
 }
 
 // ── CLOSE DROPDOWN ON OUTSIDE CLICK ─────────────────────────
