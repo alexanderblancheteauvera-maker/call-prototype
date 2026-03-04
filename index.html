@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=1280"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Prototipo — Iniciar Llamada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,17 +40,15 @@ body{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   font-size:14px;
   background:var(--app-bg);
-  display:flex;align-items:flex-start;justify-content:center;
-  min-height:100vh;padding:0;
+  height:100vh;overflow:hidden;
   -webkit-font-smoothing:antialiased;
 }
 
 /* ── APP SHELL ────────────────────────────────────────────── */
 .app{
-  width:1280px;height:720px;
+  width:100%;height:100vh;
   display:flex;flex-direction:column;
   overflow:hidden;
-  box-shadow:0 8px 40px rgba(0,0,0,.18);
 }
 
 /* ── HEADER ───────────────────────────────────────────────── */
@@ -121,18 +119,18 @@ body{
 
 /* ── CONTENT ──────────────────────────────────────────────── */
 .content{
-  display:flex;flex:1;overflow:visible;
+  display:flex;flex:1;min-height:0;overflow:hidden;
   background:var(--app-bg);
 }
 
-/* ── LEFT CHAT PANEL (612px, flat white) ──────────────────── */
+/* ── LEFT CHAT PANEL (responsive ~48%) ───────────────────── */
 .chat-panel{
-  width:612px;flex-shrink:0;
+  flex:0 0 48%;
   display:flex;flex-direction:column;
   background:white;
   position:relative;
   border-right:1px solid var(--gray-100);
-  min-height:0;
+  min-height:0;overflow:visible;
 }
 
 /* ── CUSTOMER HEADER (flat, border-bottom) ────────────────── */
@@ -274,12 +272,14 @@ body{
 }
 .audio-act svg{width:11px;height:11px;fill:var(--gray-500)}
 
-/* ── CHAT INPUT BAR (flat, border-top only) ───────────────── */
+/* ── CHAT INPUT BAR — pinned to bottom ────────────────────── */
 .chat-input{
   flex-shrink:0;
   background:white;
   border-top:1px solid var(--gray-100);
-  position:relative;
+  position:sticky;
+  bottom:0;
+  z-index:100;
   overflow:visible;
 }
 
