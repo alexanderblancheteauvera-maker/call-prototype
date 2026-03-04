@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>Prototipo — Iniciar Llamada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* ML Andes palette */
+  --blue:       #3483FA;
+  --blue-hover: #2968C8;
+  --blue-light: #EBF3FF;
+  --blue-xlight:#F5F9FF;
+  --header:     #183C73;
+  --green:      #00A650;
+  --green-bg:   #EAF9EE;
+  --red:        #F23D4F;
+  /* Grises */
+  --gray-900: #333333;
+  --gray-700: #555555;
+  --gray-500: #999999;
+  --gray-400: #BBBBBB;
+  --gray-300: #CCCCCC;
+  --gray-100: #EEEEEE;
+  --gray-050: #F5F5F5;
+  --app-bg:   #F5F5F5;
+  /* Sombras */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.06);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
+  /* Bordes */
+  --radius-card: 6px;
+  --radius-btn:  4px;
+}
+
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:14px;
+  background:var(--app-bg);
+  display:flex;align-items:flex-start;justify-content:center;
+  min-height:100vh;padding:0;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── APP SHELL ────────────────────────────────────────────── */
+.app{
+  width:1280px;height:720px;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.18);
+}
+
+/* ── HEADER ───────────────────────────────────────────────── */
+.hd{
+  height:64px;
+  background:var(--header);
+  display:flex;align-items:center;
+  padding:0 20px;gap:12px;flex-shrink:0;
+}
+.hd-logo{
+  width:32px;height:32px;border-radius:6px;
+  background:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.hd-logo svg{width:17px;height:17px;fill:rgba(255,255,255,.9)}
+.hd-tab{
+  background:rgba(255,255,255,.1);border-radius:6px;
+  padding:5px 10px;
+  display:flex;flex-direction:column;gap:1px;cursor:default;
+  min-width:170px;
+}
+.hd-tab-row1{
+  display:flex;align-items:center;gap:5px;
+  font-size:12.5px;color:rgba(255,255,255,.95);font-weight:500;
+  line-height:16px;
+}
+.hd-tab-row1 svg{width:13px;height:13px;fill:rgba(255,255,255,.55);flex-shrink:0}
+.hd-tab-title{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:150px}
+.hd-tab-x{
+  color:rgba(255,255,255,.45);font-size:13px;line-height:1;
+  cursor:pointer;padding:1px 3px;border-radius:3px;
+}
+.hd-tab-x:hover{background:rgba(255,255,255,.15);color:white}
+.hd-tab-row2{
+  display:flex;align-items:center;gap:4px;
+  font-size:10.5px;color:rgba(255,255,255,.45);line-height:13px;
+}
+.hd-tab-row2 svg{width:10px;height:10px;fill:rgba(255,255,255,.35)}
+.hd-spacer{flex:1}
+.hd-icons{display:flex;align-items:center;gap:8px}
+.hd-icon{
+  width:32px;height:32px;cursor:pointer;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.65);transition:background .15s;
+}
+.hd-icon:hover{background:rgba(255,255,255,.1);color:white}
+.hd-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* Agent badge — plain text, no pill */
+.agent-badge{
+  display:flex;align-items:center;gap:8px;
+  cursor:default;
+}
+.agent-badge-status{
+  font-size:12px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:.2px;
+}
+.agent-badge-timer{
+  font-size:12px;color:rgba(255,255,255,.8);
+  font-family:ui-monospace,'Cascadia Code',monospace;letter-spacing:.5px;
+}
+.agent-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,#6366F1,#A855F7);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:white;
+  border:2px solid rgba(255,255,255,.25);
+}
+
+/* ── CONTENT ──────────────────────────────────────────────── */
+.content{
+  display:flex;flex:1;overflow:visible;
+  background:var(--app-bg);
+}
+
+/* ── LEFT CHAT PANEL (612px, flat white) ──────────────────── */
+.chat-panel{
+  width:612px;flex-shrink:0;
+  display:flex;flex-direction:column;
+  background:white;
+  position:relative;
+  border-right:1px solid var(--gray-100);
+}
+
+/* ── CUSTOMER HEADER (flat, border-bottom) ────────────────── */
+.customer-hd{
+  padding:14px 24px;
+  background:white;
+  border-bottom:1px solid var(--gray-100);
+  flex-shrink:0;
+  min-height:76px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.customer-name{
+  font-size:16px;font-weight:600;color:var(--gray-900);
+  margin-bottom:4px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:8px;
+}
+.customer-local{
+  font-size:13px;color:var(--gray-500);
+  display:flex;align-items:center;gap:4px;flex-shrink:0;
+}
+.customer-meta{
+  font-size:13px;color:var(--gray-500);
+  display:flex;align-items:center;gap:0;
+}
+.meta-sep{margin:0 6px;color:var(--gray-300)}
+
+/* ── CALL BAR (flat, border-bottom) ──────────────────────── */
+.meliphone{
+  flex-shrink:0;
+  display:none;
+  padding:0 24px;
+  height:52px;
+  align-items:center;gap:12px;
+  background:white;
+  border-bottom:1px solid var(--gray-100);
+}
+.meliphone.show{display:flex}
+.meli-label{
+  flex:1;display:flex;align-items:center;gap:10px;
+  font-size:13.5px;color:var(--gray-900);
+}
+.meli-status{font-weight:600}
+.meli-attempt{color:var(--gray-500);font-weight:400;font-size:13px}
+.meli-btns{display:flex;align-items:center;gap:6px}
+.btn-mic{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--gray-050);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.btn-mic:hover{background:var(--gray-100)}
+.btn-mic svg{width:14px;height:14px;fill:var(--gray-700)}
+.btn-pause{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--gray-050);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.btn-pause:hover{background:var(--gray-100)}
+.btn-pause svg{width:12px;height:12px;fill:var(--gray-700)}
+.btn-hangup{
+  width:40px;height:28px;border-radius:var(--radius-btn);
+  background:var(--red);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .15s;
+}
+.btn-hangup:hover{opacity:.85}
+.btn-hangup svg{width:15px;height:15px;fill:white}
+
+/* ── MESSAGES (flat, no card) ─────────────────────────────── */
+.messages{
+  flex:1;overflow-y:auto;
+  padding:16px 24px;
+  display:flex;flex-direction:column;gap:8px;
+  background:white;
+}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:4px}
+
+.msg-row{display:flex;flex-direction:column;gap:2px}
+.msg-row.customer{align-items:flex-start}
+.msg-row.agent{align-items:flex-end}
+
+.bubble{
+  max-width:75%;
+  padding:10px 14px;
+  border-radius:12px;
+  font-size:13.5px;line-height:1.5;color:var(--gray-900);
+  display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;
+}
+.bubble-text{flex:1;min-width:0}
+.bubble-time{
+  font-size:11px;color:var(--gray-400);
+  white-space:nowrap;align-self:flex-end;flex-shrink:0;
+}
+
+.msg-row.customer .bubble{
+  background:var(--gray-050);
+  border-bottom-left-radius:2px;
+}
+.msg-row.agent .bubble{
+  background:var(--blue-light);
+  border-bottom-right-radius:2px;
+}
+.msg-row.agent .bubble-time{color:rgba(52,131,250,.5)}
+
+.call-divider{
+  display:flex;align-items:center;gap:8px;padding:4px 0;
+}
+.call-divider::before,.call-divider::after{
+  content:'';flex:1;height:1px;background:var(--gray-100);
+}
+.call-divider span{font-size:11.5px;color:var(--gray-400);white-space:nowrap}
+
+/* Audio player */
+.audio-player{
+  border:1px solid var(--gray-100);border-radius:var(--radius-card);
+  padding:12px 14px;background:var(--gray-050);
+  display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px;
+}
+.audio-label{font-size:11.5px;color:var(--gray-500)}
+.audio-label strong{color:var(--gray-700);font-weight:600}
+.audio-controls{display:flex;align-items:center;gap:10px}
+.audio-play{
+  width:32px;height:32px;border-radius:50%;background:var(--blue);
+  border:none;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.audio-play svg{width:12px;height:12px;fill:white;margin-left:2px}
+.audio-track{flex:1}
+.audio-bar{height:3px;background:var(--gray-100);border-radius:2px;margin-bottom:3px}
+.audio-bar-fill{width:2%;height:100%;background:var(--blue);border-radius:2px}
+.audio-times{display:flex;justify-content:space-between;font-size:10.5px;color:var(--gray-400)}
+.audio-acts{display:flex;gap:4px}
+.audio-act{
+  width:24px;height:24px;border-radius:50%;border:1px solid var(--gray-100);background:white;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:var(--gray-500);
+}
+.audio-act svg{width:11px;height:11px;fill:var(--gray-500)}
+
+/* ── CHAT INPUT BAR (flat, border-top only) ───────────────── */
+.chat-input{
+  flex-shrink:0;
+  background:white;
+  border-top:1px solid var(--gray-100);
+  position:relative;
+  overflow:visible;
+}
+
+/* Row 1: label + CTA */
+.input-row1{
+  height:56px;
+  display:flex;align-items:center;
+  padding:0 12px 0 20px;gap:8px;
+}
+.chat-label-btn{
+  display:flex;align-items:center;gap:6px;
+  font-size:13.5px;color:var(--gray-700);font-weight:500;
+  cursor:default;user-select:none;
+}
+.chat-label-btn svg{width:15px;height:15px;fill:var(--gray-500)}
+.chat-label-btn .chevron{font-size:10px;color:var(--gray-400)}
+.input-spacer{flex:1}
+
+/* CTA button — Andes light style */
+.cta{
+  height:36px;padding:0 16px;
+  border-radius:var(--radius-btn);cursor:pointer;
+  font-size:13.5px;font-weight:600;font-family:inherit;
+  transition:background .15s,border-color .15s;
+  white-space:nowrap;
+  display:flex;align-items:center;gap:6px;
+}
+.cta.primary{background:var(--blue-light);color:var(--blue);border:1px solid rgba(52,131,250,.4)}
+.cta.primary:hover{background:#d9ebff;border-color:var(--blue)}
+.cta.primary.open{background:#d9ebff;border-color:var(--blue)}
+/* Validating: same visual as primary + left-to-right fill animation */
+.cta.validating{
+  background:var(--blue-light);color:var(--blue);border:1px solid rgba(52,131,250,.4);
+  position:relative;overflow:hidden;cursor:default;pointer-events:none;
+}
+.cta.validating::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:0;
+  background:rgba(52,131,250,.18);
+  animation:ctaFill 1.5s linear forwards;
+}
+@keyframes ctaFill{to{width:100%}}
+/* Disabled idle: grayed out but pointer-events ON for tooltip hover */
+.cta.disabled-idle{
+  background:var(--gray-050);color:var(--gray-400);
+  border:1px solid var(--gray-100);cursor:not-allowed;
+}
+.cta.disabled-gray{background:var(--gray-050);color:var(--gray-400);border:1px solid var(--gray-100);cursor:default;pointer-events:none}
+.cta .chevron{font-size:10px;opacity:.8}
+
+/* Lightning icon button */
+.lightning-btn{
+  width:36px;height:36px;border-radius:var(--radius-btn);
+  border:1px solid var(--gray-100);background:white;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:background .15s;
+}
+.lightning-btn svg{width:16px;height:16px;fill:var(--gray-500)}
+.lightning-btn:hover{background:var(--gray-050)}
+
+/* Separator */
+.input-sep{height:1px;background:var(--gray-100);}
+
+/* Row 2: icons left, send right */
+.input-row2{
+  height:52px;
+  display:flex;align-items:center;
+  padding:0 12px 0 16px;gap:6px;
+}
+.input-placeholder{display:none}
+.icon-btn{
+  width:34px;height:34px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;border:none;background:transparent;
+  transition:background .12s;
+}
+.icon-btn:hover{background:var(--gray-050)}
+.icon-btn svg{width:18px;height:18px;fill:none;stroke:var(--gray-400);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.send-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--blue);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:background .15s;
+  margin-left:auto;
+}
+.send-btn:hover{background:var(--blue-hover)}
+.send-btn svg{width:15px;height:15px;fill:none;stroke:white;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;margin-left:2px}
+
+/* ── PHONE DROPDOWN ───────────────────────────────────────── */
+.phone-dropdown{
+  position:absolute;bottom:calc(100% + 6px);right:12px;
+  background:white;border:1px solid var(--gray-100);
+  border-radius:var(--radius-card);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+  width:236px;z-index:300;display:none;overflow:hidden;
+}
+.phone-dropdown.open{display:block}
+.dd-section-label{
+  font-size:10.5px;font-weight:600;color:var(--gray-400);
+  text-transform:uppercase;letter-spacing:.07em;
+  padding:12px 16px 4px;
+}
+.dd-option{
+  padding:11px 16px;font-size:13.5px;color:var(--gray-900);
+  cursor:pointer;display:flex;align-items:center;gap:8px;
+  transition:background .1s;
+}
+.dd-option:hover{background:var(--gray-050)}
+.dd-option.hi{background:var(--blue-xlight);color:var(--blue);font-weight:500}
+.dd-arrow{margin-left:auto;color:var(--gray-400);font-size:15px}
+.dd-divider{height:1px;background:var(--gray-100);margin:2px 0}
+
+/* Manual input — floating panel, 4px to the right of the dropdown */
+.manual-box{
+  position:absolute;
+  bottom:calc(100% + 6px);
+  left:calc(100% - 8px); /* dropdown right edge is at (container - 12px); +4px gap = container - 8px */
+  width:220px;
+  background:white;
+  border:1px solid var(--gray-100);
+  border-radius:var(--radius-card);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+  padding:12px 14px;
+  z-index:350;
+  display:none;flex-direction:column;gap:8px;
+}
+.manual-box.open{display:flex}
+.manual-label{font-size:12.5px;font-weight:500;color:var(--gray-700)}
+.manual-row{display:flex;align-items:center;gap:6px}
+.country-sel{
+  display:flex;align-items:center;gap:4px;
+  border:1px solid var(--gray-100);border-radius:var(--radius-btn);
+  padding:7px 8px;font-size:13px;color:var(--gray-700);
+  cursor:pointer;white-space:nowrap;flex-shrink:0;background:white;
+}
+.country-sel span{font-size:14px}
+.phone-input{
+  flex:1;min-width:0;border:1px solid var(--gray-100);border-radius:var(--radius-btn);
+  padding:7px 10px;font-size:13px;color:var(--gray-900);
+  outline:none;font-family:inherit;background:white;width:0;
+}
+.phone-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(52,131,250,.1)}
+.call-btn-full{
+  width:100%;height:36px;border-radius:var(--radius-btn);border:none;cursor:pointer;
+  background:var(--blue);color:white;font-size:13.5px;font-weight:600;font-family:inherit;
+  transition:background .15s;
+}
+.call-btn-full:hover{background:var(--blue-hover)}
+.call-btn-full:disabled{background:rgba(52,131,250,.4);cursor:default}
+
+/* ── TOOLTIP ──────────────────────────────────────────────── */
+.tooltip{
+  position:absolute;
+  bottom:calc(100% + 10px);right:12px;
+  background:#1F2937;color:white;
+  font-size:12.5px;padding:8px 12px;border-radius:6px;
+  white-space:nowrap;z-index:400;pointer-events:none;display:none;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+}
+.tooltip::after{
+  content:'';position:absolute;top:100%;right:30px;
+  border:5px solid transparent;border-top-color:#1F2937;
+}
+.tooltip.show{display:block}
+
+/* ── RIGHT PANEL ──────────────────────────────────────────── */
+.case-panel{
+  flex:1;background:white;
+  overflow:hidden;position:relative;
+}
+.case-inner{
+  padding:24px;filter:blur(1.5px);
+  pointer-events:none;user-select:none;height:100%;overflow:hidden;
+}
+
+/* Right panel */
+.rp-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.rp-title{font-size:16px;font-weight:700;color:var(--gray-900);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rp-badge{display:flex;align-items:center;gap:4px;border:1px solid var(--blue);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:600;color:var(--blue);white-space:nowrap;flex-shrink:0;}
+.rp-badge-x{color:var(--gray-400);cursor:pointer;margin-left:4px}
+.rp-meta{font-size:13px;color:var(--gray-500);margin-bottom:2px}
+.rp-section{margin-bottom:16px}
+.rp-section-title{font-size:12px;color:var(--gray-500);margin-bottom:6px}
+.rp-card{background:white;border-radius:var(--radius-card);border:1px solid var(--gray-100);padding:16px;margin-top:16px;}
+.rp-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.rp-card-title{font-size:15px;font-weight:700;color:var(--gray-900)}
+.rp-link{font-size:12.5px;color:var(--blue);cursor:pointer}
+.rp-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.rp-field{font-size:13px;color:var(--gray-500)}
+.rp-val{font-size:13px;color:var(--gray-900);font-weight:500}
+.rp-green{display:inline-block;background:var(--green-bg);color:var(--green);font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;}
+.rp-section-header{font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:0;margin-top:20px;}
+.rp-action-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--gray-100);margin-top:12px;}
+.rp-action-label{font-size:13px;color:var(--gray-500)}
+.rp-btn{background:var(--blue);color:white;border:none;border-radius:var(--radius-btn);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.rp-btn:hover{background:var(--blue-hover)}
+
+/* Toolbox */
+.toolbox{
+  width:56px;flex-shrink:0;
+  background:var(--gray-050);
+  border-left:1px solid var(--gray-100);
+  display:flex;flex-direction:column;
+  align-items:center;padding:16px 0;gap:8px;
+}
+.tool-btn{
+  width:40px;height:40px;border-radius:var(--radius-card);
+  background:white;border:1px solid var(--gray-100);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .15s,border-color .15s;
+  box-shadow:var(--shadow-xs);
+}
+.tool-btn:hover{background:var(--blue-xlight);border-color:rgba(52,131,250,.3)}
+.tool-btn svg{width:18px;height:18px;fill:var(--gray-500)}
+.tool-btn.active{background:var(--blue);border-color:var(--blue)}
+.tool-btn.active svg{fill:white}
+
+/* ── TOASTS ───────────────────────────────────────────────── */
+.toast{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  padding:13px 20px;
+  font-size:13.5px;font-weight:500;color:white;
+  z-index:500;
+  transform:translateY(100%);opacity:0;
+  transition:transform .22s ease,opacity .22s ease;
+  text-align:center;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-green{background:var(--green)}
+.toast-dark{background:#1F2937}
+.toast-red{background:var(--red)}
+
+.hide{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── HEADER ──────────────────────────────────────────────── -->
+  <header class="hd">
+    <div class="hd-logo">
+      <!-- 4-square grid icon -->
+      <svg viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+    </div>
+    <div class="hd-tab">
+      <div class="hd-tab-row1">
+        <!-- conversation icon -->
+        <svg viewBox="0 0 16 16"><path d="M14 1H2a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3l3 3 3-3h3a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/></svg>
+        <span class="hd-tab-title">Oscar David Romero Ca...</span>
+        <span class="hd-tab-x">✕</span>
+      </div>
+      <div class="hd-tab-row2">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/><path d="M8 4v4l3 2" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span id="sessionTimer">00:03:17</span>
+      </div>
+    </div>
+    <div class="hd-spacer"></div>
+    <div class="hd-icons">
+      <!-- Search -->
+      <div class="hd-icon">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+      <!-- Bell -->
+      <div class="hd-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <!-- Agent badge -->
+      <div class="agent-badge">
+        <span class="agent-badge-status">ON</span>
+        <span class="agent-badge-timer" id="agentTimer">02:18:37</span>
+        <div class="agent-avatar">JP</div>
+      </div>
+      <!-- External link -->
+      <div class="hd-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── CONTENT ─────────────────────────────────────────────── -->
+  <div class="content">
+
+    <!-- LEFT CHAT PANEL -->
+    <div class="chat-panel">
+
+      <!-- Customer header -->
+      <div class="customer-hd">
+        <div class="customer-name">
+          <span>Oscar David Romero Canalizo</span>
+          <div class="customer-local">
+            <span>🇲🇽</span><span>Hora local: 12:00</span>
+          </div>
+        </div>
+        <div class="customer-meta">
+          <span>Persona física · 40 años</span>
+          <span class="meta-sep">|</span>
+          <span>ID: 1078712741</span>
+        </div>
+      </div>
+
+      <!-- Call bar (hidden initially) -->
+      <div class="meliphone" id="meliphone">
+        <div class="meli-label">
+          <span class="meli-status" id="meliStatus">Conectando llamada</span>
+          <span class="meli-attempt" id="meliAttempt">1/3 intentos</span>
+        </div>
+        <div class="meli-btns">
+          <button class="btn-mic" title="Micrófono">
+            <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="19" x2="12" y2="22" stroke="#333" stroke-width="2"/><line x1="9" y1="22" x2="15" y2="22" stroke="#333" stroke-width="2"/></svg>
+          </button>
+          <button class="btn-pause" id="btnPause" style="display:none" title="Pausar">
+            <svg viewBox="0 0 24 24" fill="#333"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+          </button>
+          <button class="btn-hangup" onclick="hangUp()" title="Colgar">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.09 6.09l1.79-1.79a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.06z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages" id="messages">
+        <div class="msg-row customer">
+          <div class="bubble">
+            <span class="bubble-text">dire la renta el vehículo y lo regresan</span>
+            <span class="bubble-time">14:18</span>
+          </div>
+        </div>
+        <div class="msg-row agent">
+          <div class="bubble">
+            <span class="bubble-text">Entiendo Oscar.</span>
+            <span class="bubble-time">14:18</span>
+          </div>
+        </div>
+        <div class="msg-row customer">
+          <div class="bubble">
+            <span class="bubble-text">Ya hablé con la arrendadora de los vehículos y me comentan que ellos ya liberaron el pago ya que el contrato ya terminó</span>
+            <span class="bubble-time">14:18</span>
+          </div>
+        </div>
+        <div class="msg-row agent">
+          <div class="bubble">
+            <span class="bubble-text">Te voy a pedir unos momentos por favor</span>
+            <span class="bubble-time">14:18</span>
+          </div>
+        </div>
+        <div class="msg-row customer">
+          <div class="bubble">
+            <span class="bubble-text">Checa el estatus en el que me aparece la transacción</span>
+            <span class="bubble-time">14:19</span>
+          </div>
+        </div>
+        <div class="msg-row customer">
+          <div class="bubble">
+            <span class="bubble-text">Lo que me preocupa es que me va a llegar mi fecha de pago y que va a pasar</span>
+            <span class="bubble-time">14:19</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat input bar -->
+      <div class="chat-input" id="chatInput">
+
+        <!-- TOOLTIP -->
+        <div class="tooltip" id="tooltip">La llamada no está disponible en este momento.</div>
+
+        <!-- PHONE DROPDOWN -->
+        <div class="phone-dropdown" id="phoneDd">
+          <div class="dd-section-label">Números registrados</div>
+          <div class="dd-option" id="ddOpt1" onclick="selectPhone('+549****5467')">+549****5467</div>
+          <div class="dd-option" id="ddOpt2" onclick="selectPhone('+549****1826')">+549****1826</div>
+          <div class="dd-divider"></div>
+          <div class="dd-option" onclick="openManual()">
+            Ingresar número <span class="dd-arrow">›</span>
+          </div>
+        </div>
+
+        <!-- Manual box: sibling of dropdown, floats to its left with 4px gap -->
+        <div class="manual-box" id="manualBox">
+          <div class="manual-label">Ingresa el número de teléfono</div>
+          <div class="manual-row">
+            <div class="country-sel"><span>🇦🇷</span> +54 ▾</div>
+            <input class="phone-input" id="phoneInput" type="tel" placeholder="l"/>
+          </div>
+          <button class="call-btn-full" id="llamarBtn" onclick="callManual()" disabled>Llamar</button>
+        </div>
+
+        <!-- Row 1 -->
+        <div class="input-row1">
+          <!-- label (changes between idle and call states) -->
+          <div class="chat-label-btn" id="chatLabelBtn">
+            <svg viewBox="0 0 24 24" fill="var(--gray-500)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span id="chatLabelText">Chat</span>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="input-spacer"></div>
+          <!-- main CTA button -->
+          <button class="cta primary" id="ctaBtn"
+            onmouseenter="onHover(true)" onmouseleave="onHover(false)"
+            onclick="onCtaClick()">Iniciar llamada</button>
+          <!-- lightning -->
+          <button class="lightning-btn" title="Acciones rápidas">
+            <svg viewBox="0 0 24 24" fill="var(--gray-500)"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </button>
+        </div>
+
+        <!-- Separator + Row 2 (hidden during call) -->
+        <div id="inputRow2Wrap">
+          <div class="input-sep"></div>
+          <div class="input-row2">
+            <button class="icon-btn" title="Adjuntar">
+              <svg viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <button class="icon-btn" title="Emoji">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="3"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="3"/></svg>
+            </button>
+            <span class="input-placeholder"></span>
+            <button class="send-btn">
+              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Toasts (inside chat input area) -->
+        <div class="toast toast-green" id="toastGreen"></div>
+        <div class="toast toast-dark" id="toastDark"></div>
+        <div class="toast toast-red" id="toastRed"></div>
+      </div>
+    </div><!-- /chat-panel -->
+
+    <!-- RIGHT CASE PANEL (blurred, decorative) -->
+    <div class="case-panel">
+      <div class="case-inner">
+        <div class="rp-header">
+          <div class="rp-title">Nombre del proceso: nombre del p...</div>
+          <div class="rp-badge">Estado actual 1/5 <span class="rp-badge-x">›</span></div>
+          <div class="rp-badge-x" style="margin-left:4px">✕</div>
+        </div>
+        <div class="rp-meta">Id: P00003, Fecha: 21/11 13:11:16</div>
+        <div class="rp-meta">Tipo: Acción pendiente</div>
+        <div style="margin:12px 0;height:1px;background:var(--gray-100)"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          <span style="font-size:12.5px;color:var(--gray-500)">Si puede hacer nuevo PIN consultar</span>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;gap:8px">
+          <div style="display:flex;gap:6px">
+            <div class="rp-badge" style="background:var(--blue-light)">Si</div>
+            <div class="rp-badge" style="border-color:var(--gray-100);color:var(--gray-500)">No</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          <span style="font-size:12.5px;color:var(--gray-500)">Bien concluida</span>
+        </div>
+        <div class="rp-action-row">
+          <span class="rp-action-label">Elige una opción para continuar</span>
+          <button class="rp-btn">Iniciar proceso</button>
+        </div>
+        <div class="rp-section-header">Pago sin dos recibo de pago</div>
+        <div class="rp-card">
+          <div class="rp-card-header">
+            <div class="rp-card-title">Tipo de movimiento</div>
+            <span class="rp-link">Retiro</span>
+          </div>
+          <div class="rp-row">
+            <span class="rp-field">Flujo id:</span>
+            <span class="rp-val">123456789</span>
+          </div>
+          <div style="margin:6px 0">
+            <span class="rp-green">Pago aceptado</span>
+            <span style="font-size:12px;color:var(--gray-500);margin-left:8px">Con movimiento asociado</span>
+          </div>
+          <div class="rp-row"><span class="rp-field">Fin de pago:</span><span class="rp-val">Pendiente retiro</span></div>
+          <div class="rp-row"><span class="rp-field">Reintento:</span><span class="rp-val">Pendiente</span></div>
+          <div class="rp-row"><span class="rp-field">Categoría:</span><span class="rp-val">Monedero</span></div>
+          <div class="rp-row"><span class="rp-field">Error de movimiento:</span><span class="rp-val">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOLBOX -->
+    <div class="toolbox">
+      <div class="tool-btn active">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="tool-btn">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      </div>
+      <div class="tool-btn">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <div class="tool-btn">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+// ── STATE ────────────────────────────────────────────────────
+// States: idle | validating | choosing | dropdown | manual | connecting | calling | in_call | ended
+let state = 'idle';
+let callSecs = 0;
+let callInterval = null;
+let chooseTimer = null;
+let attempt = 1;
+let validationAttempts = 0; // increments each time startValidation() is called, resets on hangUp
+let ctaDisabled = false;    // true when button is in disabled-idle state
+
+// ── DOM ──────────────────────────────────────────────────────
+const meliphone   = document.getElementById('meliphone');
+const meliStatus  = document.getElementById('meliStatus');
+const meliAttempt = document.getElementById('meliAttempt');
+const btnPause    = document.getElementById('btnPause');
+const ctaBtn      = document.getElementById('ctaBtn');
+const chatLabelText = document.getElementById('chatLabelText');
+const phoneDd     = document.getElementById('phoneDd');
+const manualBox   = document.getElementById('manualBox');
+const phoneInput  = document.getElementById('phoneInput');
+const llamarBtn   = document.getElementById('llamarBtn');
+const inputRow2W  = document.getElementById('inputRow2Wrap');
+const messages    = document.getElementById('messages');
+const tooltip     = document.getElementById('tooltip');
+
+// ── TIMERS ───────────────────────────────────────────────────
+let agentSec = 2*3600 + 18*60 + 37;
+setInterval(() => {
+  agentSec++;
+  const h = String(Math.floor(agentSec/3600)).padStart(2,'0');
+  const m = String(Math.floor((agentSec%3600)/60)).padStart(2,'0');
+  const s = String(agentSec%60).padStart(2,'0');
+  document.getElementById('agentTimer').textContent = `${h}:${m}:${s}`;
+},1000);
+
+let sessionSec = 3*60 + 17;
+setInterval(() => {
+  sessionSec++;
+  const m = String(Math.floor(sessionSec/60)).padStart(2,'0');
+  const s = String(sessionSec%60).padStart(2,'0');
+  document.getElementById('sessionTimer').textContent = `${m}:${s}`;
+},1000);
+
+// ── PHONE INPUT VALIDATION ───────────────────────────────────
+phoneInput.addEventListener('input', () => {
+  llamarBtn.disabled = phoneInput.value.trim().length < 6;
+});
+
+// ── HOVER (tooltip only when disabled) ───────────────────────
+function onHover(entering) {
+  if (ctaDisabled) tooltip.classList.toggle('show', entering);
+  else tooltip.classList.remove('show');
+}
+
+// ── MAIN CTA CLICK ───────────────────────────────────────────
+function onCtaClick() {
+  if (ctaDisabled)            return;
+  if (state === 'idle')       return startValidation();
+  if (state === 'choosing')   return openDropdown();
+  if (state === 'dropdown')   return closeDropdown();
+}
+
+// ── VALIDATION FLOW ──────────────────────────────────────────
+function startValidation() {
+  validationAttempts++;
+  state = 'validating';
+  ctaDisabled = false;
+  tooltip.classList.remove('show');
+  setCta('validating', 'Validando llamada'); // rule 1: same style + fill animation
+  setTimeout(() => {
+    state = 'choosing';
+    setCta('primary', 'Elegir número ▲'); // rule 2: same style as Iniciar llamada
+    startChooseCountdown();
+    showToast('green', '¡Listo! Tienes 1 minuto para confirmar el contacto y elegir un número.');
+  }, 1500);
+}
+
+function startChooseCountdown() {
+  clearTimeout(chooseTimer);
+  chooseTimer = setTimeout(() => {
+    if (['choosing','dropdown','manual'].includes(state)) {
+      showToast('dark', 'Se agotó el tiempo para iniciar esta llamada.');
+      if (validationAttempts >= 2) {
+        resetToDisabled(); // rule 3: second+ timeout → disabled button
+      } else {
+        resetToIdle();
+      }
+    }
+  }, 60000);
+}
+
+function openDropdown() {
+  state = 'dropdown';
+  phoneDd.classList.add('open');
+  ctaBtn.classList.add('open');
+}
+
+function closeDropdown() {
+  state = 'choosing';
+  phoneDd.classList.remove('open');
+  manualBox.classList.remove('open');
+  ctaBtn.classList.remove('open');
+}
+
+function openManual() {
+  state = 'manual';
+  manualBox.classList.add('open');
+  phoneInput.focus();
+}
+
+function selectPhone(number) {
+  clearTimeout(chooseTimer);
+  phoneDd.classList.remove('open');
+  manualBox.classList.remove('open');
+  beginCall(number);
+}
+
+function callManual() {
+  if (!phoneInput.value.trim()) return;
+  clearTimeout(chooseTimer);
+  phoneDd.classList.remove('open');
+  manualBox.classList.remove('open');
+  beginCall('+54 ' + phoneInput.value.trim());
+}
+
+// ── CALL FLOW ────────────────────────────────────────────────
+function beginCall(number) {
+  state = 'connecting';
+  attempt = 1;
+  callSecs = 0;
+
+  // Show call bar, hide row2
+  meliphone.classList.add('show');
+  inputRow2W.style.display = 'none';
+  chatLabelText.textContent = 'Conversación';
+  // update icon
+  document.querySelector('#chatLabelBtn svg').innerHTML = '<circle cx="12" cy="12" r="10" fill="none" stroke="var(--gray-500)" stroke-width="2"/><path d="M12 6v6l4 2" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round"/>';
+  setCta('disabled-gray', 'Elegir número ▾');
+  btnPause.style.display = 'none';
+
+  setMeli('Conectando llamada', '1/3 intentos');
+  addDivider('Llamada iniciada');
+
+  // → Llamando after 1.5s
+  setTimeout(() => {
+    if (state !== 'connecting') return;
+    state = 'calling';
+    btnPause.style.display = 'flex';
+    setMeli('Llamando...', '00:01  ·  1/3 intentos');
+    callSecs = 1;
+    callInterval = setInterval(() => {
+      if (state !== 'calling') return;
+      callSecs++;
+      const t = fmt(callSecs);
+      setMeli('Llamando...', `${t}  ·  1/3 intentos`);
+    }, 1000);
+
+    // → In call after 4s
+    setTimeout(() => {
+      if (state !== 'calling') return;
+      clearInterval(callInterval);
+      state = 'in_call';
+      callSecs = 0;
+      setMeli('Llamada en curso', '00:00');
+      callInterval = setInterval(() => {
+        if (state !== 'in_call') return;
+        callSecs++;
+        setMeli('Llamada en curso', fmt(callSecs));
+      }, 1000);
+    }, 4000);
+  }, 1500);
+}
+
+function hangUp() {
+  clearInterval(callInterval);
+  validationAttempts = 0; // reset on successful call
+  ctaDisabled = false;
+  const wasInCall = ['calling','in_call','connecting'].includes(state);
+  state = 'ended';
+
+  meliphone.classList.remove('show');
+  btnPause.style.display = 'none';
+  inputRow2W.style.display = '';
+
+  // Restore chat label
+  chatLabelText.textContent = 'Chat';
+  document.querySelector('#chatLabelBtn svg').innerHTML = '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="var(--gray-500)"/>';
+
+  setCta('primary', 'Elegir número ▲');
+  state = 'choosing';
+  startChooseCountdown();
+
+  addDivider('Llamada finalizada');
+  addAudioPlayer();
+  showToast('dark', 'La llamada finalizó. Si necesitas, tienes 10 segundos para retomarla.');
+
+  // Reset to idle after 10s
+  setTimeout(() => {
+    if (state === 'choosing') resetToIdle();
+  }, 10000);
+}
+
+// ── RESET ────────────────────────────────────────────────────
+function resetToIdle() {
+  state = 'idle';
+  ctaDisabled = false;
+  clearInterval(callInterval);
+  meliphone.classList.remove('show');
+  inputRow2W.style.display = '';
+  chatLabelText.textContent = 'Chat';
+  document.querySelector('#chatLabelBtn svg').innerHTML = '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="var(--gray-500)"/>';
+  phoneDd.classList.remove('open');
+  manualBox.classList.remove('open');
+  phoneInput.value = '';
+  llamarBtn.disabled = true;
+  setCta('primary', 'Iniciar llamada');
+}
+
+// rule 3: second timeout → disabled idle with tooltip on hover
+function resetToDisabled() {
+  state = 'idle';
+  ctaDisabled = true;
+  clearInterval(callInterval);
+  clearTimeout(chooseTimer);
+  meliphone.classList.remove('show');
+  inputRow2W.style.display = '';
+  chatLabelText.textContent = 'Chat';
+  document.querySelector('#chatLabelBtn svg').innerHTML = '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="var(--gray-500)"/>';
+  phoneDd.classList.remove('open');
+  manualBox.classList.remove('open');
+  phoneInput.value = '';
+  llamarBtn.disabled = true;
+  setCta('disabled-idle', 'Iniciar llamada');
+}
+
+// ── HELPERS ──────────────────────────────────────────────────
+function setCta(cls, label) {
+  ctaBtn.className = 'cta ' + cls;
+  // validating needs a span child so the fill ::before stays behind text
+  if (cls === 'validating') {
+    ctaBtn.innerHTML = `<span style="position:relative;z-index:1">${label}</span>`;
+  } else {
+    ctaBtn.textContent = label;
+  }
+  ctaBtn.onclick = onCtaClick;
+  // attach hover for primary (Iniciar llamada / Elegir número) and disabled-idle
+  const needsHover = cls === 'primary' || cls === 'disabled-idle';
+  ctaBtn.onmouseenter = needsHover ? () => onHover(true) : null;
+  ctaBtn.onmouseleave = needsHover ? () => onHover(false) : null;
+}
+
+function setMeli(status, attempt) {
+  meliStatus.textContent = status;
+  meliAttempt.textContent = attempt;
+}
+
+function fmt(secs) {
+  return String(Math.floor(secs/60)).padStart(2,'0') + ':' + String(secs%60).padStart(2,'0');
+}
+
+function addDivider(text) {
+  const d = document.createElement('div');
+  d.className = 'call-divider';
+  d.innerHTML = `<span>${text}</span>`;
+  messages.appendChild(d);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function addAudioPlayer() {
+  const w = document.createElement('div');
+  w.className = 'msg-row customer';
+  w.innerHTML = `
+    <div class="audio-player">
+      <div class="audio-label"><strong>Registro de la llamada</strong> &nbsp;&nbsp;14:55</div>
+      <div class="audio-controls">
+        <button class="audio-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></button>
+        <div class="audio-track">
+          <div class="audio-bar"><div class="audio-bar-fill"></div></div>
+          <div class="audio-times"><span>0:00</span><span>08:10</span></div>
+        </div>
+        <div class="audio-acts">
+          <div class="audio-act" style="font-size:10px;font-weight:700">1x</div>
+          <div class="audio-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  messages.appendChild(w);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// ── TOASTS ───────────────────────────────────────────────────
+const toastTimers = {};
+function showToast(type, msg) {
+  const id = 'toast' + type.charAt(0).toUpperCase() + type.slice(1);
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimers[type]);
+  toastTimers[type] = setTimeout(() => el.classList.remove('show'), 4500);
+}
+
+// ── CLOSE DROPDOWN ON OUTSIDE CLICK ─────────────────────────
+document.addEventListener('click', e => {
+  if (['dropdown','manual'].includes(state)) {
+    if (!phoneDd.contains(e.target) && e.target !== ctaBtn) {
+      closeDropdown();
+    }
+  }
+  if (state === 'idle') tooltip.classList.remove('show');
+});
+</script>
+</body>
+</html>
